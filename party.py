@@ -5,7 +5,8 @@ import pathlib
 import threading
 import keyboard
 
-media_path = pathlib.Path('/opt/movies')
+movie_dir = pathlib.Path('/opt/movies')
+namesList = ['How_The_Grinch_Stole_Christmas', "Santa_Claus_Is_Comin'", 'Rudolph_The_Red', 'Gremlins', 'Home_Alone', 'A_Christmas_Story', 'Christmas_Vacation', 'Krampus', 'Batman_Returns', 'Nightmare_Before_Christmas']
 def input_thread(skip_signal):
     while True:
         keyboard.wait('space') 
@@ -13,18 +14,23 @@ def input_thread(skip_signal):
         time.sleep(3)
         skip_signal.clear()
 
-def play_movie_chapters(media_path, skip_signal):
+def play_movie_chapters(movie_dir, skip_signal):
 
     media_player = vlc.MediaPlayer()
     media_player.set_fullscreen(True)
-    EXTENSIONS = {'.mkv', '.avi'}
-    movies_directory_list = media_path.glob('**/*')
-    movies_path_list = [movie for movie in movies_directory_list if movie.suffix in EXTENSIONS]
-    print(movies_path_list)
+    christmas_paths_list = []
+    for name in namesList:
+        for path in movie_dir.glob(f'**/*{name}*.mkv'):
+            christmas_paths_list.append(path)
+
+        
+#    movies_directory_list = movie_dir.glob('**/*')
+#    movies_path_list = [movie for movie in movies_directory_list if movie.suffix in EXTENSIONS]
+    print(christmas_paths_list)
     while True:
-        movie_path_idx = random.randint(0,len(movies_path_list)-1)
-        print(movies_path_list[movie_path_idx])
-        media = vlc.Media(movies_path_list[movie_path_idx])
+        movie_path_idx = random.randint(0,len(christmas_paths_list)-1)
+        print(christmas_paths_list[movie_path_idx])
+        media = vlc.Media(christmas_paths_list[movie_path_idx])
         media_player.set_media(media)
         media_player.play()
         loading = True
@@ -38,7 +44,7 @@ def play_movie_chapters(media_path, skip_signal):
             media_player.set_chapter(0)
             random_chapter = 0
         else:
-            random_chapter = random.randint(1,num_chapters)
+            random_chapter = random.randint(1,num_chapters-1)
             print("Current chapter: " + str(random_chapter))
             media_player.set_chapter(random_chapter)
         current_chapter = random_chapter
@@ -52,7 +58,7 @@ def play_movie_chapters(media_path, skip_signal):
 
 
 skip_signal = threading.Event()
-play_thread = threading.Thread(target=play_movie_chapters, args=(media_path, skip_signal,))
+play_thread = threading.Thread(target=play_movie_chapters, args=(movie_dir, skip_signal,))
 listener = threading.Thread(target=input_thread, args=(skip_signal,))
 play_thread.start()
 listener.start()
