@@ -4,14 +4,17 @@ import vlc
 import pathlib
 import threading
 from pynput import keyboard
-
+import  pickle
 skip_signal = False
 terminate_signal = False
 
 movie_dir = pathlib.Path('/opt/movies')
 #movie_dir = pathlib.Path('smb://192.168.1.87/storage/Movies')
 #namesList = ['How_The_Grinch_Stole_Christmas', "Santa_Claus_Is_Comin'", 'Rudolph_The_Red', 'Gremlins', 'Home_Alone', 'A_Christmas_Story', 'Christmas_Vacation', 'Krampus', 'Batman_Returns', 'Nightmare_Before_Christmas']
-namesDic = {'How_The_Grinch_Stole_Christmas': [[1]], "Santa_Claus_Is_Comin'": [[2]], 'Nightmare_Before_Christmas': [[2,4]]}
+#namesDic = {'How_The_Grinch_Stole_Christmas': [[1]], "Santa_Claus_Is_Comin'": [[2]], 'Nightmare_Before_Christmas': [[2,4]]}
+with open('HalloweenMovies2022.pickle', 'rb') as handle:
+    namesDic = pickle.load(handle)
+
 #def input_thread(skip_signal):
 #    while True:
 #        keyboard.wait('space') 
@@ -36,14 +39,14 @@ def play_movie_chapters(movie_dir):
     media_player = vlc.MediaPlayer()
     media_player.set_fullscreen(True)
 #    christmas_paths_list = []
-    for name in namesDic.keys():
-        for path in movie_dir.glob(f'**/*{name}*.mkv'):
-            namesDic[name].append(path)
+#    for name in namesDic.keys():
+#        for path in movie_dir.glob(f'**/*{name}*.mkv'):
+#            namesDic[name].append(path)
 
         
 #    movies_directory_list = movie_dir.glob('**/*')
 #    movies_path_list = [movie for movie in movies_directory_list if movie.suffix in EXTENSIONS]
-    print(namesDic)
+#    print(namesDic)
     while playing:
         skip_signal = False
         random_movie_key = random.choice(list(namesDic.keys()))
@@ -64,7 +67,7 @@ def play_movie_chapters(movie_dir):
             random_chapter = 0
         elif len(namesDic[random_movie_key][0]) > 0:
             chapters_list = namesDic[random_movie_key][0]
-            random_chapter = random.choice(chapters_list)
+            random_chapter = random.choice(chapters_list) - 1
             media_player.set_chapter(random_chapter)
         else:
             random_chapter = random.randint(1,num_chapters-1)
